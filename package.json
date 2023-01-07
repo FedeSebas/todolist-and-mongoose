@@ -14,10 +14,6 @@
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
-<<<<<<< HEAD
-    "live-server": "^1.2.2",
-=======
->>>>>>> 24d0d5d59bab0343a4ca8338bbba6507e8f64ee4
     "lodash": "^4.17.21",
     "mongoose": "^6.8.2"
   }
