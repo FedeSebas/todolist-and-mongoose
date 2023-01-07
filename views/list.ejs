@@ -5,15 +5,15 @@
   </div>
   <div class="box">
   
-    <% itemsOutput.forEach((item){ %>
-        <form action="" method="post">
-          <div class="item">
-            <input type="checkbox" name="checkbox" value="" onchange="this.form.submit()">
-            <p><%=item.name%></p>
-          </div>
-        </form>
-      <% }) %> 
-      <form class="item" action="/" method="post">
+    <% itemsOutput.forEach(function(item){ %>
+      <form action="<%= formPathDelete %>" method="post">
+        <div class="item">
+          <input type="checkbox" name="checkbox" value="<%= item._id %>" onChange="this.form.submit()">
+          <p><%=item.name %></p>
+        </div>
+      </form>
+	<% }) %> 
+      <form class="item" action="<%= formPathInsert %>" method="post">
         <input type="text" name="item" placeholder="New Item" autocomplete="off">
         <button type="submit" name="list" value="<%= listTitle %>">+</button>
       </form>
