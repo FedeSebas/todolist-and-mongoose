@@ -2,18 +2,18 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-
+require("dotenv").config();
 
 const app = express();
 
 app.set("view engine","ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public"));
+app.use(express.static(__dirname + "/public"));
 
 mongoose.set('strictQuery', true);
 
-mongoose.connect("mongodb://192.168.0.110:27017/todolistDB2",{useNewUrlParser: true});
+mongoose.connect(`mongodb+srv://admin-federico:${process.env.PASSWORD}@cluster0.ytf9jji.mongodb.net/todolistDB`,{useNewUrlParser: true});
 
 const itemSchema = new mongoose.Schema({
   name: String
@@ -82,19 +82,19 @@ app.post("/delete",function(req,res){
 })
 
 app.get("/lists/:list",function(req,res){
-  const listTitle = req.params.list;
+  const listTitle =  _.kebabCase(req.params.list);
   List.findOne({name: listTitle},function(err,foundItem){
     if(err)console.log(err);
     else{
       if(!foundItem){
         const list = new List({
-          naame: listTitle,
+          name: listTitle,
           items: defaultItems
         })
         list.save()
         res.redirect("/lists/"+listTitle)
       }else{
-        res.render("list",{listTitle: foundItem.name, itemsOutput: foundItem.items, formPathDelete: "/lists/"+listTitle+"/delete", formPathInsert: "/lists/"+listTitle});
+        res.render("list",{listTitle: _.startCase(foundItem.name), itemsOutput: foundItem.items, formPathDelete: "/lists/"+foundItem.name+"/delete", formPathInsert: "/lists/"+foundItem.name});
       }
       
     }
@@ -103,12 +103,17 @@ app.get("/lists/:list",function(req,res){
 })
 
 app.post("/lists/:list",function(req,res){
-  const listTitle = req.params.list;
+  const listTitle =  req.params.list;
   const listNew = req.body.item;
   List.findOne({name: listTitle},function(err,foundItem){
     if(err)console.log(err);
     else{
-      
+      const itemNew = new Item({
+        name: listNew
+      })
+      foundItem.items.push(itemNew);
+      foundItem.save()
+      res.redirect("/lists/"+listTitle)
     }
   })
 })
@@ -116,18 +121,19 @@ app.post("/lists/:list",function(req,res){
 app.post("/lists/:list/delete",function(req,res){
   const listTitle = req.params.list;
   const checkBoxId = req.body.checkbox;
-  List.findByIdAndDelete({itmes:[{_id: checkBoxId}],function(err){
-    if(err)cnsole.log(err);
-    else console.log("Succesfully deleted!");
-  }})
-  res.redirect("/lists/"+listTitle);
+  List.findOneAndUpdate({name: listTitle},{$pull: {items: {_id: checkBoxId}}},function(err,foundItem){
+    if(err) console.log(err);
+    else{
+      res.redirect("/lists/"+listTitle)
+    }
+  })
 })
 
 app.get("/about",function(req,res){
   res.render("about")
 })
 
-app.listen(3000,function(){
+app.listen(process.env.PORT,function(){
   console.log("Running on port 3000");
 })
 
